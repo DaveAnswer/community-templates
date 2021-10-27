@@ -2,7 +2,7 @@ module.exports = {
   translation: {
     'SKILL_NAME': "Daily Stand Up",
     'GREETING': [
-      "Welcome to %s. To continue, please say \"empezar mi stand up\".",
+      "Welcome to %s. To continue, please say \"start my stand up\".",
     ],
     'PERSONALIZED_GREETING': [
       "Hello %s",

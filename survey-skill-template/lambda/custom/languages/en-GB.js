@@ -5,7 +5,7 @@ module.exports = {
       "Welcome to %s. To continue, please say \"start my stand up\".",
     ],
     'PERSONALIZED_GREETING': [
-      "Hello %s",
+      "Hello %s.",
     ],
     'PERSONALIZED_FALLBACK': [
       "Sorry, I am unable to recognize you. To continue, please tell me your passcode.",

@@ -9,7 +9,7 @@ module.exports = {
       "Qual è il tuo codice pin?",
     ],
     'PERSONALIZED_GREETING': [
-      "Ciao %s",
+      "Ciao %s.",
     ],
     'PERSONALIZED_FALLBACK': [
       "Mi dispiace, non riesco a riconoscerti. Per continuare, dimmi il tuo passcode.",

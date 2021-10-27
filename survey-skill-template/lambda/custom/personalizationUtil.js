@@ -53,18 +53,13 @@ const handleFallback = () => { return EMPTY }
  *      if person has consented for sharing the name, fetch the name and returns
  *      if person has NOT consented for sharing the name, throws an error permission_denied
  *
- * If no person detected, then checks for the fallbackToAccount flag,
- *      if fallbackToAccount=true,
- *          if account has consented for sharing the name, returns the account level name
- *          if account has NOT consented for sharing the name, throws an error permission_denied
- *
  **/
 const getPersonalizedPromptFromId = async(handlerInput) => {
         const client = handlerInput.serviceClientFactory.getUpsServiceClient();
         const personResponse = {};
-        const personId = getPersonId(handlerInput);
-        console.log("Received personId: ", personId);
         try {
+            const personId = getPersonId(handlerInput);
+            console.log("Received personId: ", personId);
             const givenName = await client.getPersonsProfileGivenName();
             console.log('Given person name successfully retrieved, now responding to user.' + givenName);
             if (givenName !== null) {
@@ -78,6 +73,7 @@ const getPersonalizedPromptFromId = async(handlerInput) => {
             }
             else
             {
+                console.log('Exception in processing getPersonalizedPromptFromId :  ${JSON.stringify(ex)}');
                 personResponse.error = getErrorObj(UNKNOWN_ERROR, error.statusMessage);
             }
         }

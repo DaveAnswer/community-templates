@@ -9,7 +9,7 @@ module.exports = {
       "Qual é a sua senha?",
     ],
     'PERSONALIZED_GREETING': [
-      "Olá %s",
+      "Olá %s.",
     ],
     'PERSONALIZED_FALLBACK': [
       "Desculpe, não consigo reconhecê-lo. Para continuar, diga-me sua senha.",

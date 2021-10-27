@@ -94,7 +94,7 @@ const StartMyStandupIntentHandler = {
                    .getResponse();
        }
 
-       return resolveUser(handlerInput, personResponse);
+       return resolveUser(handlerInput, personResponse, true);
   },
 };
 
@@ -115,7 +115,7 @@ const GetCodeIntentHandler = {
     const pinAttempts = sessionAttributes.pinAttempts || 1;
 
     let speakOutput = requestAttributes.t('PIN_VALID');
-    const repromptOutput = requestAttributes.t('PIN_VALID_REPROMPT');
+    const repromptOutput = requestAttributes.t('PIN_INVALID_REPROMPT');
 
     if (pinAttempts > 2) {
       speakOutput = requestAttributes.t('PIN_MAX_ATTEMPTS');
@@ -494,17 +494,16 @@ function getUserByPin(userPin) {
  * @params handlerInput - the handlerInput recvd from the IntentRequest
  * @params personResponse - JSON response from personUtil representing the resolved person name
  **/
-async function resolveUser(handlerInput, personResponse) {
-const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    let speakOutput;
-    const repromptOutput = requestAttributes.t('GREETING_REPROMPT');
+async function resolveUser(handlerInput, personResponse, canRedirect) {
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    let speakOutput = requestAttributes.t('PERSONALIZED_FALLBACK');
+    let repromptOutput = requestAttributes.t('GREETING_REPROMPT');
     let response = handlerInput.responseBuilder;
     try
     {
         if(personResponse !== null
                 && personResponse.resolvedName !== undefined) {
-            // Continue if no permission error encountered
-                    speakOutput = requestAttributes.t('PERSONALIZED_GREETING', personResponse.resolvedName);
+                    // Continue if no permission error encountered
                     const upsServiceClient = handlerInput.serviceClientFactory.getUpsServiceClient();
                     const profileEmail = await upsServiceClient.getProfileEmail();
                     const profileName = personResponse.resolvedName;
@@ -513,19 +512,31 @@ const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
                     sessionAttributes.userName = profileName;
                     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
-            response
-                      .addDelegateDirective({
-                        name: 'GetReportIntent',
-                        confirmationStatus: 'NONE',
-                        slots: {},
-                      });
+                    if(canRedirect)
+                    {
+                        // When permissions were not requested
+                        speakOutput = requestAttributes.t('PERSONALIZED_GREETING', personResponse.resolvedName);
+
+                        response
+                          .addDelegateDirective({
+                            name: 'GetReportIntent',
+                            confirmationStatus: 'NONE',
+                            slots: {},
+                          });
+                    }
+                    else
+                    {
+                        // When permissions were requested and approved
+                        // this is done because currently intent chaining is not supported from any
+                        // Skill Connections requests, such as SessionResumedRequest.
+                        speakOutput = requestAttributes.t('PERSONALIZED_GREETING', personResponse.resolvedName) + " " +
+                                        requestAttributes.t('ABOUT_REPROMPT');
+                        repromptOutput = requestAttributes.t('ABOUT_REPROMPT');
+                    }
             }
-            else {
-                  speakOutput = requestAttributes.t('PERSONALIZED_FALLBACK')
-                }
       } catch (err) {
         speakOutput = requestAttributes.t('PERSONALIZED_FALLBACK')
-      }
+    }
     return response
       .speak(speakOutput)
       .reprompt(repromptOutput)
@@ -544,7 +555,7 @@ const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
  **/
 async function handleCallBackForVoiceConsentAccepted(handlerInput) {
     const personResponse = await personalization.getPersonalizedPrompt(handlerInput);
-    return resolveUser(handlerInput, personResponse);
+    return resolveUser(handlerInput, personResponse, false);
 }
 
 // This function saves a copy of the stand up report to S3

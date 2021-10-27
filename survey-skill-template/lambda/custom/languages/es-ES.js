@@ -8,7 +8,7 @@ module.exports = {
       "¿Cuál es tu pin?",
     ],
     'PERSONALIZED_GREETING': [
-      "Hola %s",
+      "Hola %s.",
     ],
     'PERSONALIZED_FALLBACK': [
       "Lo siento, no puedo reconocerte. Para continuar, dígame su contraseña.",

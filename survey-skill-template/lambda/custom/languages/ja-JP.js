@@ -9,7 +9,7 @@ module.exports = {
       "アンショウバンゴウを教えてください",
     ],
     'PERSONALIZED_GREETING': [
-      "こんにちは %s",
+      "こんにちは %s.",
     ],
     'PERSONALIZED_FALLBACK': [
       "申し訳ありませんが、あなたを認識できません。続行するには、パスコードを教えてください",

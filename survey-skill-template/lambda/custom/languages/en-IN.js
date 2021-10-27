@@ -8,7 +8,7 @@ module.exports = {
       "What is your passcode?",
     ],
     'PERSONALIZED_GREETING': [
-      "Hello %s",
+      "Hello %s.",
     ],
     'PERSONALIZED_FALLBACK': [
       "Sorry, I am unable to recognize you. To continue, please tell me your passcode.",

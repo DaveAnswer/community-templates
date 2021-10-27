@@ -82,5 +82,11 @@ module.exports = {
     'ENV_NOT_CONFIGURED': "いくつかの環境変数が正しく設定されていません。リードミーファイルに記載されているヘルプを参照してください。",
     'ERROR': "聞き取れませんでした。もう一度お願いします。",
     'ERROR_REPROMPT': "もう一度お願いします。",
+    'VOICE_CONSENT_DENIED_REPROMPT': [
+            "アプリにアクセスして権限を付与してください。",
+        ],
+        'VOICE_CONSENT_ERROR_REPROMPT': [
+            "何かがうまくいかなかった。後でもう一度やり直してください。",
+        ],
   },
 };

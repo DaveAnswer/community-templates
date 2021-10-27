@@ -21,7 +21,8 @@ const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
 const luxon = require('luxon');
 const sgMail = require('@sendgrid/mail');
-const personalization = require('./personalizationUtil')
+const personalization = require('./personalizationUtil');
+const voiceConsentUtil = require('./voiceConsentUtil');
 
 // edit the team.json file to add uer pins
 const usersData = require('./team.json');
@@ -80,36 +81,20 @@ const StartMyStandupIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'StartMyStandupIntent';
   },
   async handle(handlerInput) {
-    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    let speakOutput;
-    const repromptOutput = requestAttributes.t('GREETING_REPROMPT');
-    let response = handlerInput.responseBuilder;
-    const person = personalization.getPerson(handlerInput);
-    if (person) {
-      try {
-        speakOutput = requestAttributes.t('PERSONALIZED_GREETING', personalization.getPersonalizedPrompt(handlerInput));
-        const upsServiceClient = handlerInput.serviceClientFactory.getUpsServiceClient();
-        const profileEmail = await upsServiceClient.getProfileEmail();
-        const profileName = await upsServiceClient.getProfileName();
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-        sessionAttributes.userEmail = profileEmail;
-        sessionAttributes.userName = profileName;
-        response
-          .addDelegateDirective({
-            name: 'GetReportIntent',
-            confirmationStatus: 'NONE',
-            slots: {},
-          });
-      } catch (err) {
-        speakOutput = requestAttributes.t('PERSONALIZED_FALLBACK')
-      }
-    } else {
-      speakOutput = requestAttributes.t('PERSONALIZED_FALLBACK')
-    }
-    return response
-      .speak(speakOutput)
-      .reprompt(repromptOutput)
-      .getResponse()
+       const personResponse = await personalization.getPersonalizedPrompt(handlerInput);
+       // If the response contains error
+       if(personResponse !== null
+           && personResponse.error !== undefined
+           && personResponse.error.statusCode === personalization.PERSON_PERMISSION_DENIED) {
+               // This is the call to the library to ask for voice consent
+               // Pass the scope needed for which permissions are needed
+               let permissionScope = new voiceConsentUtil.RequestedPermission("alexa::profile:given_name:read",
+                    voiceConsentUtil.CONSENT_LEVEL.PERSON);
+               return voiceConsentUtil.getVoiceConsentPermissionRequest(handlerInput, [permissionScope])
+                   .getResponse();
+       }
+
+       return resolveUser(handlerInput, personResponse);
   },
 };
 
@@ -502,6 +487,66 @@ function getUserByPin(userPin) {
   }));
 }
 
+/**
+ * resolveUser : verifies for the personResponse from personUtil,
+ * else invokes GetCodeIntent to validate the user based on passcode.
+ *
+ * @params handlerInput - the handlerInput recvd from the IntentRequest
+ * @params personResponse - JSON response from personUtil representing the resolved person name
+ **/
+async function resolveUser(handlerInput, personResponse) {
+const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    let speakOutput;
+    const repromptOutput = requestAttributes.t('GREETING_REPROMPT');
+    let response = handlerInput.responseBuilder;
+    try
+    {
+        if(personResponse !== null
+                && personResponse.resolvedName !== undefined) {
+            // Continue if no permission error encountered
+                    speakOutput = requestAttributes.t('PERSONALIZED_GREETING', personResponse.resolvedName);
+                    const upsServiceClient = handlerInput.serviceClientFactory.getUpsServiceClient();
+                    const profileEmail = await upsServiceClient.getProfileEmail();
+                    const profileName = await upsServiceClient.getProfileName();
+                    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+                    sessionAttributes.userEmail = profileEmail;
+                    sessionAttributes.userName = profileName;
+                    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+
+            response
+                      .addDelegateDirective({
+                        name: 'GetReportIntent',
+                        confirmationStatus: 'NONE',
+                        slots: {},
+                      });
+            }
+            else {
+                  speakOutput = requestAttributes.t('PERSONALIZED_FALLBACK')
+                }
+      } catch (err) {
+        speakOutput = requestAttributes.t('PERSONALIZED_FALLBACK')
+      }
+    return response
+      .speak(speakOutput)
+      .reprompt(repromptOutput)
+      .getResponse()
+  }
+
+/**
+ * Voice consent request - response is handled via Skill Connections.
+ * Hence we need to handle async response from the Voice Consent.
+ * The user could have accepted or rejected or skipped the voice consent request.
+ * Create your custom callBackFunction to handle accepted flow - in this case its handling identifying the person
+ * The rejected/skipped default handling is taken care by the library.
+ *
+ * @params handlerInput - the handlerInput recvd from the IntentRequest
+ * @returns
+ **/
+async function handleCallBackForVoiceConsentAccepted(handlerInput) {
+    const personResponse = await personalization.getPersonalizedPrompt(handlerInput);
+    return resolveUser(handlerInput, personResponse);
+}
+
 // This function saves a copy of the stand up report to S3
 // the report is located in the 'reports/yyyy-mm-dd/' folder
 // where 'yyyy-mm-dd' is the data the reports was created
@@ -579,6 +624,10 @@ exports.handler = Alexa.SkillBuilders.custom()
     SessionEndedRequestHandler,
     FallbackIntentHandler,
     IntentReflectorHandler,
+
+    //handler that handles skill response for voice consent
+    //Since voice consent is async, the call back is handled via handleCallBackForVoiceConsentAccepted
+    new voiceConsentUtil.SessionResumedRequestHandler(handleCallBackForVoiceConsentAccepted)
   )
   .addRequestInterceptors(
     EnvironmentCheckInterceptor,

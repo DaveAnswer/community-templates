@@ -81,5 +81,11 @@ module.exports = {
     'ENV_NOT_CONFIGURED': "One or more environment variables is not set. Please see the readme file for help.",
     'ERROR': "Sorry, I didn\'t get that. Could you say that again?",
     'ERROR_REPROMPT': "Could you say that again?",
+    'VOICE_CONSENT_DENIED_REPROMPT': [
+            "Please visit the app to grant permissions.",
+        ],
+        'VOICE_CONSENT_ERROR_REPROMPT': [
+            "Something went wrong. Please try again later.",
+        ],
   },
 };

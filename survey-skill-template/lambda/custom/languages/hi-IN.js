@@ -82,5 +82,11 @@ module.exports = {
     'ENV_NOT_CONFIGURED': "एक या अधिक environment variable set नहीं है। कृपया मदद के लिए readme file देखें।",
     'ERROR': "क्षमा करें, मुझे वह नहीं मिला। क्या आप यह फिर से कह सकते हैं?",
     'ERROR_REPROMPT': "क्या आप यह फिर से कह सकते हैं?",
+    'VOICE_CONSENT_DENIED_REPROMPT': [
+            "अनुमति देने के लिए कृपया ऐप पर जाएं।",
+        ],
+        'VOICE_CONSENT_ERROR_REPROMPT': [
+            "कुछ गलत हो गया। बाद में पुन: प्रयास करें।",
+        ],
   },
 };

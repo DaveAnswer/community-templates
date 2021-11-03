@@ -8,7 +8,7 @@ module.exports = {
       "¿Cuál es tu pin?",
     ],
     'PERSONALIZED_GREETING': [
-      "Hola %s",
+      "Hola %s.",
     ],
     'PERSONALIZED_FALLBACK': [
       "Lo siento, no puedo reconocerte. Para continuar, dígame su contraseña.",
@@ -81,5 +81,11 @@ module.exports = {
     'ENV_NOT_CONFIGURED': "No se establece una o más variables de entorno. Consulta el archivo Léame para obtener ayuda.",
     'ERROR': "Lo siento, no entendí eso. ¿Podrías repetir lo que dijiste?",
     'ERROR_REPROMPT': "¿Podrías repetir lo que dijiste?",
+    'VOICE_CONSENT_DENIED_REPROMPT': [
+        "Visite la aplicación para otorgar permisos.",
+    ],
+    'VOICE_CONSENT_ERROR_REPROMPT': [
+        "Algo salió mal. Por favor, inténtelo de nuevo más tarde.",
+    ],
   },
 };

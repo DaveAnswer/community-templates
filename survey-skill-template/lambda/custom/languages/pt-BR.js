@@ -9,7 +9,7 @@ module.exports = {
       "Qual é a sua senha?",
     ],
     'PERSONALIZED_GREETING': [
-      "Olá %s",
+      "Olá %s.",
     ],
     'PERSONALIZED_FALLBACK': [
       "Desculpe, não consigo reconhecê-lo. Para continuar, diga-me sua senha.",
@@ -82,5 +82,11 @@ module.exports = {
     'ENV_NOT_CONFIGURED': "Uma ou mais configurações não estão ajustadas. Por favor leia o arquivo readme para ajuda.",
     'ERROR': "Desculpe, eu não entendi. Você poderia repetir?",
     'ERROR_REPROMPT': "Você poderia repetir?",
+    'VOICE_CONSENT_DENIED_REPROMPT': [
+        "Visite o aplicativo para conceder permissões.",
+    ],
+    'VOICE_CONSENT_ERROR_REPROMPT': [
+        "Algo deu errado. Por favor, tente novamente mais tarde.",
+    ],
   },
 };
